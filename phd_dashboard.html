@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CSAI PhD Progress Dashboard</title>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  margin: 0; padding: 20px;
+  background: #fafafa; color: #1a1a1a;
+  font-size: 14px; line-height: 1.5;
+}
+h1 { margin: 0 0 4px 0; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+h2 { margin: 0 0 12px 0; font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: #555; }
+h3 { margin: 0 0 8px 0; font-size: 14px; font-weight: 600; }
+.subtitle { color: #666; font-size: 13px; margin-bottom: 20px; }
+.grid { display: grid; gap: 16px; }
+.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.card {
+  background: #fff; border: 1px solid #e5e5e5; border-radius: 10px;
+  padding: 16px; margin-bottom: 16px;
+}
+.kpi-card {
+  background: #fff; border: 1px solid #e5e5e5; border-radius: 10px;
+  padding: 14px; text-align: center;
+}
+.kpi-num { font-size: 28px; font-weight: 700; line-height: 1; color: #1a1a1a; }
+.kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #777; margin-top: 4px; }
+.kpi-num.warn { color: #c87510; }
+.kpi-num.bad { color: #c0392b; }
+.kpi-num.good { color: #2a8c3c; }
+.paper {
+  border-left: 4px solid #ccc;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: #fafafa;
+  border-radius: 0 8px 8px 0;
+}
+.paper.status-drafting { border-left-color: #c87510; }
+.paper.status-review { border-left-color: #5b6bbf; }
+.paper.status-submitted { border-left-color: #5b6bbf; }
+.paper.status-accepted { border-left-color: #2a8c3c; }
+.paper.status-published { border-left-color: #2a8c3c; }
+.paper.status-not-started { border-left-color: #ccc; }
+.paper-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+.paper-title { font-weight: 600; font-size: 14px; }
+.paper-meta { font-size: 12px; color: #666; }
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.badge.not-started { background: #eee; color: #555; }
+.badge.drafting { background: #fce8d1; color: #8b4f0d; }
+.badge.review { background: #dde2f5; color: #2b3a78; }
+.badge.submitted { background: #dde2f5; color: #2b3a78; }
+.badge.accepted { background: #d4efd9; color: #1f6a2e; }
+.badge.published { background: #c8e6cf; color: #155a25; }
+select, input[type="text"], input[type="number"] {
+  padding: 4px 8px; border: 1px solid #ddd; border-radius: 6px;
+  font-family: inherit; font-size: 13px; background: #fff;
+}
+.btn {
+  background: #1a1a1a; color: #fff; border: none; border-radius: 6px;
+  padding: 6px 12px; font-size: 12px; cursor: pointer; font-family: inherit;
+}
+.btn:hover { background: #333; }
+.btn.ghost { background: #fff; color: #1a1a1a; border: 1px solid #ddd; }
+.btn.ghost:hover { background: #f5f5f5; }
+.btn.danger { background: #fff; color: #c0392b; border: 1px solid #e5b7b1; }
+.btn.danger:hover { background: #fdecea; }
+.btn.sm { padding: 3px 8px; font-size: 11px; }
+.controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+.bar { background: #eee; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 6px; }
+.bar > div { height: 100%; background: #2a8c3c; transition: width 0.3s; }
+.expert-row {
+  display: grid; grid-template-columns: 1fr 1fr 130px 90px 90px 30px;
+  gap: 6px; align-items: center; padding: 6px 0; border-bottom: 1px solid #f0f0f0;
+  font-size: 13px;
+}
+.expert-row.head { font-weight: 600; font-size: 11px; text-transform: uppercase; color: #777; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+.expert-row .del { background: none; border: none; color: #c0392b; cursor: pointer; font-size: 16px; }
+.milestone {
+  display: flex; align-items: flex-start; gap: 8px; padding: 6px 0;
+  border-bottom: 1px dashed #eee;
+}
+.milestone input[type="checkbox"] { margin-top: 3px; }
+.milestone .wk { font-weight: 600; color: #777; font-size: 11px; min-width: 44px; }
+.milestone .lbl { flex: 1; font-size: 13px; }
+.milestone.done .lbl { text-decoration: line-through; color: #999; }
+.tab-bar { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid #e5e5e5; }
+.tab { padding: 8px 14px; cursor: pointer; border-bottom: 2px solid transparent; font-size: 13px; font-weight: 500; color: #666; }
+.tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+.note-area {
+  width: 100%; min-height: 60px; padding: 8px; border: 1px solid #e5e5e5;
+  border-radius: 6px; font-family: inherit; font-size: 13px; resize: vertical;
+}
+.export-bar {
+  display: flex; gap: 6px; justify-content: flex-end; margin-top: 16px;
+  padding-top: 12px; border-top: 1px solid #e5e5e5;
+}
+.muted { color: #777; font-size: 12px; }
+.thesis-banner {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
+  color: #fff; padding: 14px 18px; border-radius: 10px; margin-bottom: 20px;
+}
+.thesis-banner .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.7; margin-bottom: 4px; }
+.thesis-banner .thesis { font-size: 14px; font-style: italic; line-height: 1.4; }
+@media (max-width: 700px) { .cols-3, .cols-2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<h1>CSAI PhD Progress Dashboard</h1>
+<div class="subtitle">3-month sprint to thesis submission • Updated locally in your browser</div>
+
+<div class="thesis-banner">
+  <div class="label">Central thesis (do not drift)</div>
+  <div class="thesis" id="thesisText">Designing and Evaluating a Governance Architecture for Safe Generative AI Integration in K-12 Education.</div>
+</div>
+
+<div class="grid cols-3" id="kpiRow"></div>
+
+<div class="tab-bar">
+  <div class="tab active" data-tab="papers">Papers</div>
+  <div class="tab" data-tab="delphi">Delphi Pool</div>
+  <div class="tab" data-tab="timeline">12-Week Plan</div>
+  <div class="tab" data-tab="notes">Supervisor Notes</div>
+</div>
+
+<div class="tab-pane active" id="tab-papers">
+  <div class="card">
+    <h2>Papers</h2>
+    <div id="paperList"></div>
+  </div>
+</div>
+
+<div class="tab-pane" id="tab-delphi">
+  <div class="card">
+    <h2>Delphi expert pool <span class="muted" id="expertCounter"></span></h2>
+    <p class="muted" style="margin:0 0 12px 0;">Target: 12-15 committed experts. Mix of DSLs, IT coordinators, digital learning leads, assessment coordinators.</p>
+    <div id="expertTable"></div>
+    <div class="controls" style="margin-top: 12px;">
+      <button class="btn" id="addExpertBtn">+ Add expert</button>
+    </div>
+  </div>
+</div>
+
+<div class="tab-pane" id="tab-timeline">
+  <div class="card">
+    <h2>12-Week milestones</h2>
+    <div id="milestoneList"></div>
+  </div>
+</div>
+
+<div class="tab-pane" id="tab-notes">
+  <div class="card">
+    <h2>Supervisor & meeting notes</h2>
+    <p class="muted" style="margin:0 0 8px 0;">Quick log — confirmations, feedback, decisions. Persists locally.</p>
+    <textarea class="note-area" id="notesArea" placeholder="e.g. 24 Jun - confirm 3-paper minimum with supervisor; ethics expedited route OK"></textarea>
+  </div>
+</div>
+
+<div class="export-bar">
+  <button class="btn ghost sm" id="exportBtn">Export JSON backup</button>
+  <button class="btn ghost sm" id="importBtn">Import JSON</button>
+  <button class="btn danger sm" id="resetBtn">Reset all data</button>
+</div>
+
+<input type="file" id="fileInput" accept="application/json" style="display:none">
+
+<script>
+"use strict";
+
+const STORAGE_KEY = "csai_phd_dashboard_v1";
+const SUBMISSION_DATE = "2026-09-24"; // 3 months from 2026-06-24
+const STATUSES = ["not-started", "drafting", "submitted", "review", "accepted", "published"];
+const STATUS_LABELS = {
+  "not-started": "Not started",
+  "drafting": "Drafting",
+  "submitted": "Submitted",
+  "review": "Under review",
+  "accepted": "Accepted",
+  "published": "Published"
+};
+
+const DEFAULT_STATE = {
+  thesis: "Designing and Evaluating a Governance Architecture for Safe Generative AI Integration in K-12 Education.",
+  papers: [
+    {
+      id: "p1",
+      title: "Paper 1: Systematic review of K-12 generative AI governance gap",
+      target: "Computers & Education / BJET / Education and Information Technologies",
+      status: "not-started",
+      wordCount: 0,
+      wordTarget: 8000,
+      lastUpdate: ""
+    },
+    {
+      id: "p2",
+      title: "Paper 2: CSAI-AIGF framework + Delphi Round 1",
+      target: "AI and Ethics / Internet Policy Review",
+      status: "not-started",
+      wordCount: 0,
+      wordTarget: 9000,
+      lastUpdate: ""
+    },
+    {
+      id: "p3",
+      title: "Paper 3: AILII index + scenario stress-test (Delphi R2)",
+      target: "Computers & Education / AI and Ethics",
+      status: "not-started",
+      wordCount: 0,
+      wordTarget: 9000,
+      lastUpdate: ""
+    },
+    {
+      id: "chapter-seaol",
+      title: "Thesis chapter: SEAOL architecture (not a paper)",
+      target: "Embedded in thesis",
+      status: "not-started",
+      wordCount: 0,
+      wordTarget: 6000,
+      lastUpdate: ""
+    },
+    {
+      id: "thesis",
+      title: "Integrating chapters + thesis manuscript",
+      target: "Final submission",
+      status: "not-started",
+      wordCount: 0,
+      wordTarget: 25000,
+      lastUpdate: ""
+    }
+  ],
+  experts: [],
+  milestones: [
+    { wk: "W1", lbl: "Email supervisor to confirm research-by-publication minimum (3 vs 5 papers, does 'submitted' count)" },
+    { wk: "W1", lbl: "Set up master research database (Notion or Zotero)" },
+    { wk: "W1", lbl: "List 25 Delphi expert candidates; send first 10 invites" },
+    { wk: "W1", lbl: "File ethics application (low-risk adult expert review)" },
+    { wk: "W2-3", lbl: "Systematic literature review for Paper 1" },
+    { wk: "W4", lbl: "Draft Paper 1; submit to target journal" },
+    { wk: "W5", lbl: "Confirm Delphi expert pool (12-15 committed)" },
+    { wk: "W5-6", lbl: "Draft Paper 2 (CSAI-AIGF framework)" },
+    { wk: "W7", lbl: "Launch Delphi Round 1 (asynchronous, ~15 min survey)" },
+    { wk: "W7-8", lbl: "Draft SEAOL thesis chapter" },
+    { wk: "W8", lbl: "Submit Paper 2 with Delphi R1 results" },
+    { wk: "W9", lbl: "Run Delphi Round 2 (AILII indicators + scenarios)" },
+    { wk: "W9-10", lbl: "Draft Paper 3 (AILII + scenario evaluation)" },
+    { wk: "W10-12", lbl: "Write integrating chapters; embed papers + SEAOL" },
+    { wk: "W12", lbl: "Final formatting; supervisor review; SUBMIT THESIS" }
+  ],
+  milestoneDone: {},
+  notes: ""
+};
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return structuredClone(DEFAULT_STATE);
+    const parsed = JSON.parse(raw);
+    // Merge with defaults so new fields appear after upgrade
+    return Object.assign(structuredClone(DEFAULT_STATE), parsed);
+  } catch (e) {
+    return structuredClone(DEFAULT_STATE);
+  }
+}
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+let state = loadState();
+
+function daysUntil(dateStr) {
+  const target = new Date(dateStr);
+  const now = new Date();
+  return Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+}
+
+function renderKpis() {
+  const total = state.papers.length;
+  const submittedOrBeyond = state.papers.filter(p => ["submitted", "review", "accepted", "published"].includes(p.status)).length;
+  const drafting = state.papers.filter(p => p.status === "drafting").length;
+  const totalWords = state.papers.reduce((s, p) => s + (p.wordCount || 0), 0);
+  const targetWords = state.papers.reduce((s, p) => s + (p.wordTarget || 0), 0);
+  const wordPct = targetWords ? Math.round(100 * totalWords / targetWords) : 0;
+  const days = daysUntil(SUBMISSION_DATE);
+  const expertsCommitted = state.experts.filter(e => e.status === "committed" || e.status === "round1-done" || e.status === "round2-done").length;
+  const expertsTarget = 12;
+  const milestonesDone = Object.values(state.milestoneDone).filter(Boolean).length;
+  const milestonesTotal = state.milestones.length;
+
+  const daysClass = days < 14 ? "bad" : days < 30 ? "warn" : "good";
+  const wordsClass = wordPct >= 80 ? "good" : wordPct >= 40 ? "warn" : "bad";
+  const expertsClass = expertsCommitted >= expertsTarget ? "good" : expertsCommitted >= 6 ? "warn" : "bad";
+
+  document.getElementById("kpiRow").innerHTML = `
+    <div class="kpi-card"><div class="kpi-num ${daysClass}">${days}</div><div class="kpi-label">Days to thesis submission</div></div>
+    <div class="kpi-card"><div class="kpi-num">${submittedOrBeyond} / ${total - 1}</div><div class="kpi-label">Papers + chapters submitted</div></div>
+    <div class="kpi-card"><div class="kpi-num ${expertsClass}">${expertsCommitted} / ${expertsTarget}</div><div class="kpi-label">Delphi experts committed</div></div>
+    <div class="kpi-card"><div class="kpi-num ${wordsClass}">${wordPct}%</div><div class="kpi-label">Total words drafted</div></div>
+    <div class="kpi-card"><div class="kpi-num">${drafting}</div><div class="kpi-label">Currently drafting</div></div>
+    <div class="kpi-card"><div class="kpi-num">${milestonesDone} / ${milestonesTotal}</div><div class="kpi-label">Milestones complete</div></div>
+  `;
+}
+
+function renderPapers() {
+  const html = state.papers.map((p, i) => {
+    const wordPct = p.wordTarget ? Math.min(100, Math.round(100 * (p.wordCount || 0) / p.wordTarget)) : 0;
+    const statusOpts = STATUSES.map(s => `<option value="${s}" ${p.status === s ? "selected" : ""}>${STATUS_LABELS[s]}</option>`).join("");
+    return `
+      <div class="paper status-${p.status}">
+        <div class="paper-head">
+          <div class="paper-title">${escapeHtml(p.title)}</div>
+          <span class="badge ${p.status}">${STATUS_LABELS[p.status]}</span>
+        </div>
+        <div class="paper-meta">Target venue: ${escapeHtml(p.target || "—")} ${p.lastUpdate ? `• Last update: ${escapeHtml(p.lastUpdate)}` : ""}</div>
+        <div class="bar"><div style="width:${wordPct}%"></div></div>
+        <div class="paper-meta" style="margin-top:4px;">${p.wordCount || 0} / ${p.wordTarget || 0} words (${wordPct}%)</div>
+        <div class="controls">
+          <select data-idx="${i}" data-field="status">${statusOpts}</select>
+          <input type="number" data-idx="${i}" data-field="wordCount" value="${p.wordCount || 0}" min="0" style="width:90px" placeholder="Words">
+          <input type="text" data-idx="${i}" data-field="target" value="${escapeHtml(p.target || "")}" placeholder="Target venue" style="flex:1; min-width:160px">
+          <button class="btn sm" data-action="markUpdate" data-idx="${i}">Stamp update</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+  document.getElementById("paperList").innerHTML = html;
+}
+
+function renderExperts() {
+  const head = `
+    <div class="expert-row head">
+      <div>Name</div>
+      <div>Role / institution</div>
+      <div>Status</div>
+      <div>R1 sent</div>
+      <div>R2 sent</div>
+      <div></div>
+    </div>
+  `;
+  const STATUSES_E = ["invited", "declined", "committed", "round1-done", "round2-done"];
+  const rows = state.experts.map((e, i) => {
+    const opts = STATUSES_E.map(s => `<option value="${s}" ${e.status === s ? "selected" : ""}>${s}</option>`).join("");
+    return `
+      <div class="expert-row">
+        <input type="text" data-eidx="${i}" data-field="name" value="${escapeHtml(e.name || "")}" placeholder="Name">
+        <input type="text" data-eidx="${i}" data-field="role" value="${escapeHtml(e.role || "")}" placeholder="e.g. DSL, Secondary">
+        <select data-eidx="${i}" data-field="status">${opts}</select>
+        <input type="text" data-eidx="${i}" data-field="r1" value="${escapeHtml(e.r1 || "")}" placeholder="date">
+        <input type="text" data-eidx="${i}" data-field="r2" value="${escapeHtml(e.r2 || "")}" placeholder="date">
+        <button class="del" data-action="delExpert" data-eidx="${i}" title="Remove">×</button>
+      </div>
+    `;
+  }).join("");
+  const empty = state.experts.length === 0 ? `<p class="muted" style="margin:10px 0 0 0;">No experts yet. Click "Add expert" to start your Delphi pool.</p>` : "";
+  document.getElementById("expertTable").innerHTML = head + rows + empty;
+  const committed = state.experts.filter(e => ["committed", "round1-done", "round2-done"].includes(e.status)).length;
+  document.getElementById("expertCounter").textContent = `(${state.experts.length} invited, ${committed} committed)`;
+}
+
+function renderMilestones() {
+  const html = state.milestones.map((m, i) => {
+    const done = !!state.milestoneDone[i];
+    return `
+      <div class="milestone ${done ? "done" : ""}">
+        <input type="checkbox" data-midx="${i}" ${done ? "checked" : ""}>
+        <span class="wk">${escapeHtml(m.wk)}</span>
+        <span class="lbl">${escapeHtml(m.lbl)}</span>
+      </div>
+    `;
+  }).join("");
+  document.getElementById("milestoneList").innerHTML = html;
+}
+
+function renderAll() {
+  renderKpis();
+  renderPapers();
+  renderExperts();
+  renderMilestones();
+  document.getElementById("notesArea").value = state.notes || "";
+  document.getElementById("thesisText").textContent = state.thesis;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+}
+
+function todayStamp() {
+  const d = new Date();
+  return d.toISOString().slice(0, 10);
+}
+
+// Tab switching
+document.querySelectorAll(".tab").forEach(t => {
+  t.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    document.querySelectorAll(".tab-pane").forEach(x => x.classList.remove("active"));
+    t.classList.add("active");
+    document.getElementById("tab-" + t.dataset.tab).classList.add("active");
+  });
+});
+
+// Paper field changes
+document.getElementById("paperList").addEventListener("change", e => {
+  const idx = e.target.dataset.idx;
+  const field = e.target.dataset.field;
+  if (idx === undefined || !field) return;
+  const val = e.target.type === "number" ? Number(e.target.value) : e.target.value;
+  state.papers[Number(idx)][field] = val;
+  saveState();
+  renderAll();
+});
+document.getElementById("paperList").addEventListener("click", e => {
+  if (e.target.dataset.action === "markUpdate") {
+    const idx = Number(e.target.dataset.idx);
+    state.papers[idx].lastUpdate = todayStamp();
+    saveState();
+    renderPapers();
+  }
+});
+
+// Expert table
+document.getElementById("addExpertBtn").addEventListener("click", () => {
+  state.experts.push({ name: "", role: "", status: "invited", r1: "", r2: "" });
+  saveState();
+  renderExperts();
+  renderKpis();
+});
+document.getElementById("expertTable").addEventListener("change", e => {
+  const idx = e.target.dataset.eidx;
+  const field = e.target.dataset.field;
+  if (idx === undefined || !field) return;
+  state.experts[Number(idx)][field] = e.target.value;
+  saveState();
+  renderKpis();
+  document.getElementById("expertCounter").textContent =
+    `(${state.experts.length} invited, ${state.experts.filter(e => ["committed","round1-done","round2-done"].includes(e.status)).length} committed)`;
+});
+document.getElementById("expertTable").addEventListener("click", e => {
+  if (e.target.dataset.action === "delExpert") {
+    const idx = Number(e.target.dataset.eidx);
+    state.experts.splice(idx, 1);
+    saveState();
+    renderExperts();
+    renderKpis();
+  }
+});
+
+// Milestones
+document.getElementById("milestoneList").addEventListener("change", e => {
+  const idx = e.target.dataset.midx;
+  if (idx === undefined) return;
+  state.milestoneDone[idx] = e.target.checked;
+  saveState();
+  renderMilestones();
+  renderKpis();
+});
+
+// Notes (autosave on blur)
+document.getElementById("notesArea").addEventListener("blur", e => {
+  state.notes = e.target.value;
+  saveState();
+});
+
+// Export / import / reset
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `csai_phd_dashboard_${todayStamp()}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+document.getElementById("importBtn").addEventListener("click", () => {
+  document.getElementById("fileInput").click();
+});
+document.getElementById("fileInput").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const imported = JSON.parse(ev.target.result);
+      state = Object.assign(structuredClone(DEFAULT_STATE), imported);
+      saveState();
+      renderAll();
+    } catch (err) {
+      alert("Import failed: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+});
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if (!confirm("Reset all dashboard data? This cannot be undone (export first if needed).")) return;
+  state = structuredClone(DEFAULT_STATE);
+  saveState();
+  renderAll();
+});
+
+renderAll();
+</script>
+</body>
+</html>
